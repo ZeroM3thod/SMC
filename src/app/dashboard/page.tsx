@@ -1,17 +1,13 @@
 'use client';
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interface Window { Chart: any; }
 }
-
 export default function DashboardPage() {
   const router = useRouter();
-
   /* ── State ── */
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [activeNav, setActiveNav]           = useState('dashboard');
@@ -25,7 +21,6 @@ export default function DashboardPage() {
   const [wdAmt, setWdAmt]                   = useState('');
   const [chartMode, setChartMode]           = useState<'roi' | 'usdt'>('roi');
   const [chartReady, setChartReady]         = useState(false);
-
   /* ── Refs ── */
   const bgCanvasRef   = useRef<HTMLCanvasElement>(null);
   const cfCanvasRef   = useRef<HTMLCanvasElement>(null);
@@ -35,7 +30,6 @@ export default function DashboardPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chartInstance = useRef<any>(null);
   const balanceRef    = useRef(2847.65);
-
   /* ── Toast ── */
   const showToast = useCallback((msg: string) => {
     setToastMsg('✓  ' + msg);
@@ -43,7 +37,6 @@ export default function DashboardPage() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToastShow(false), 3200);
   }, []);
-
   /* ── Balance animation ── */
   const animBal = useCallback((target: number, dur = 1100) => {
     const from = balanceRef.current;
@@ -59,7 +52,6 @@ export default function DashboardPage() {
     };
     balAnimRef.current = requestAnimationFrame(tick);
   }, []);
-
   /* ── Confetti ── */
   const launchConfetti = useCallback(() => {
     const cfc = cfCanvasRef.current;
@@ -92,7 +84,6 @@ export default function DashboardPage() {
     };
     cfLoop();
   }, []);
-
   /* ── Background canvas ── */
   useEffect(() => {
     const bgC = bgCanvasRef.current;
@@ -135,16 +126,13 @@ export default function DashboardPage() {
     window.addEventListener('resize',resize); resize(); anim();
     return ()=>{ window.removeEventListener('resize',resize); cancelAnimationFrame(animId); };
   }, []);
-
   /* ── Progress bar ── */
   useEffect(() => { const t=setTimeout(()=>setProgWidth('46.7%'),350); return ()=>clearTimeout(t); }, []);
-
   /* ── Balance ticker ── */
   useEffect(() => {
     const iv=setInterval(()=>{ const n=Math.max(2600,balanceRef.current+(Math.random()-.48)*.6); animBal(n,700); },4200);
     return ()=>clearInterval(iv);
   }, [animBal]);
-
   /* ── Chart.js init ── */
   const initChart = useCallback(() => {
     if (!chartRef.current || !window.Chart) return;
@@ -168,9 +156,7 @@ export default function DashboardPage() {
       },
     });
   }, []);
-
   useEffect(() => { if (chartReady) initChart(); }, [chartReady, initChart]);
-
   /* ── Switch chart ── */
   const switchChart = useCallback((mode:'roi'|'usdt') => {
     if (!chartInstance.current || !chartRef.current) return;
@@ -195,7 +181,6 @@ export default function DashboardPage() {
     chartInstance.current.update('active');
     setChartMode(mode);
   }, []);
-
   /* ── ESC / scroll lock / reveal ── */
   useEffect(() => {
     const h=(e:KeyboardEvent)=>{ if(e.key==='Escape'){setDepositOpen(false);setWithdrawOpen(false);setSidebarOpen(false);} };
@@ -211,7 +196,6 @@ export default function DashboardPage() {
     document.querySelectorAll<HTMLElement>('.db-reveal').forEach(el=>obs.observe(el));
     return ()=>obs.disconnect();
   }, []);
-
   /* ── Transactions ── */
   const processTx = (type:'deposit'|'withdraw') => {
     const amt=parseFloat(type==='deposit'?depAmt:wdAmt)||200;
@@ -219,7 +203,6 @@ export default function DashboardPage() {
     else                  { setWithdrawOpen(false); animBal(Math.max(0,balanceRef.current-amt)); showToast('Withdrawal of $'+amt.toLocaleString()+' processed'); }
     launchConfetti();
   };
-
   /* ── Copy referral ── */
   const copyRef = () => {
     const code='VAULT-X-RK2025';
@@ -231,7 +214,6 @@ export default function DashboardPage() {
     };
     navigator.clipboard?.writeText(code).then(()=>showToast('Referral code copied')).catch(fb)??fb();
   };
-
   /* ════════════════════════════════════════════════ */
   return (
     <>
@@ -240,9 +222,7 @@ export default function DashboardPage() {
       <canvas ref={cfCanvasRef} style={{position:'fixed',inset:0,zIndex:2000,pointerEvents:'none'}}/>
       <div className={`db-toast${toastShow?' show':''}`}>{toastMsg}</div>
       <div className={`db-sidebar-overlay${sidebarOpen?' open':''}`} onClick={()=>setSidebarOpen(false)}/>
-
       <div className="db-layout">
-
         {/* SIDEBAR */}
         <aside className={`db-sidebar${sidebarOpen?' open':''}`}>
           <div className="db-sidebar-logo">
@@ -253,7 +233,7 @@ export default function DashboardPage() {
           <nav className="db-sidebar-nav">
             {([
               {id:'dashboard',svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,label:'Dashboard',fn:()=>{setActiveNav('dashboard');setSidebarOpen(false);showToast('Dashboard view');}},
-              {id:'seasons',  svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,label:'Seasons',fn:()=>{setActiveNav('seasons');setSidebarOpen(false);showToast('Seasons view');}},
+              {id:'seasons',  svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,label:'Seasons',fn:()=>{setSidebarOpen(false); router.push('/season');}},
               {id:'deposit',  svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Deposit',fn:()=>{setDepositOpen(true);setSidebarOpen(false);}},
               {id:'withdraw', svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Withdraw',fn:()=>{setWithdrawOpen(true);setSidebarOpen(false);}},
               {id:'referral', svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>,label:'Referral',fn:()=>{setActiveNav('referral');setSidebarOpen(false);showToast('Referral view');}},
@@ -272,7 +252,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </aside>
-
         {/* MOBILE TOPBAR */}
         <div className="db-topbar">
           <button className="db-hamburger" onClick={()=>setSidebarOpen(true)}><span/><span/><span/></button>
@@ -281,11 +260,9 @@ export default function DashboardPage() {
           </div>
           <div className="db-avatar" style={{width:32,height:32,fontSize:'.8rem',cursor:'pointer'}} onClick={()=>router.push('/profile')}>RK</div>
         </div>
-
         {/* MAIN */}
         <main className="db-main">
           <div style={{maxWidth:900,margin:'0 auto'}}>
-
             {/* HEADER */}
             <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:16,marginBottom:28}} className="db-reveal">
               <div>
@@ -298,7 +275,6 @@ export default function DashboardPage() {
                 <div className="db-live-pill"><div className="db-live-dot"/>Season 4 Live</div>
               </div>
             </div>
-
             {/* BALANCE HERO */}
             <div className="db-balance-hero db-reveal" style={{marginBottom:20,transitionDelay:'.06s'}}>
               <div style={{display:'flex',flexWrap:'wrap',alignItems:'flex-start',justifyContent:'space-between',gap:16,position:'relative',zIndex:1}}>
@@ -325,7 +301,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
             {/* STAT CARDS */}
             <div className="db-grid-4 db-reveal" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20,transitionDelay:'.1s'}}>
               {([
@@ -346,16 +321,13 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-
             {/* ACTION BUTTONS */}
             <div className="db-grid-2 db-reveal" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:20,transitionDelay:'.13s'}}>
               <button className="db-btn db-btn-dark" onClick={()=>setDepositOpen(true)}><span>+ Deposit</span></button>
               <button className="db-btn db-btn-outline" onClick={()=>setWithdrawOpen(true)}>Withdraw →</button>
             </div>
-
             {/* CHART + SEASONS */}
             <div className="db-mid-grid db-reveal" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:20}}>
-
               {/* CHART */}
               <div className="db-card" style={{padding:'22px 20px'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
@@ -376,7 +348,6 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
-
               {/* SEASONS */}
               <div className="db-card" style={{padding:'22px 20px'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
@@ -416,7 +387,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
             {/* REFERRAL CARD */}
             <div className="db-card db-reveal" style={{padding:'24px 22px',marginBottom:20,transitionDelay:'.18s'}}>
               <div className="db-ref-head-grid" style={{display:'grid',gridTemplateColumns:'1fr auto',alignItems:'start',gap:16,marginBottom:20}}>
@@ -442,7 +412,6 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-
             {/* NOTICE STRIP */}
             <div className="db-reveal" style={{background:'var(--ink)',borderRadius:'var(--r-lg)',padding:'18px 22px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap',transitionDelay:'.22s'}}>
               <div>
@@ -451,11 +420,9 @@ export default function DashboardPage() {
               </div>
               <button className="db-btn db-btn-dark" style={{whiteSpace:'nowrap',flexShrink:0}} onClick={()=>setDepositOpen(true)}><span>Invest Now</span></button>
             </div>
-
           </div>
         </main>
       </div>
-
       {/* DEPOSIT MODAL */}
       <div className={`db-modal-overlay${depositOpen?' open':''}`} onClick={e=>{if(e.target===e.currentTarget)setDepositOpen(false);}}>
         <div className="db-modal-sheet">
@@ -485,7 +452,6 @@ export default function DashboardPage() {
           <button className="db-btn db-btn-dark" style={{width:'100%',padding:14}} onClick={()=>processTx('deposit')}><span>Confirm Deposit</span></button>
         </div>
       </div>
-
       {/* WITHDRAW MODAL */}
       <div className={`db-modal-overlay${withdrawOpen?' open':''}`} onClick={e=>{if(e.target===e.currentTarget)setWithdrawOpen(false);}}>
         <div className="db-modal-sheet">
