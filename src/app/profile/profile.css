@@ -138,27 +138,7 @@
 .pf-toast.show { transform: translateX(-50%) translateY(0); }
 .pf-toast.ok { border-color: rgba(74,103,65,0.4); color: var(--sage-l); }
 
-/* ── BOTTOM NAV ── */
-.pf-bottom-nav {
-  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(246,241,233,0.95); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border); padding: 8px 0;
-}
-.pf-bottom-nav-inner { display: flex; justify-content: space-around; }
-.pf-bnav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-size: .58rem; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--txt3); cursor: pointer; padding: 4px 10px;
-  border: none; background: none; font-family: 'DM Sans', sans-serif;
-  transition: color .2s; -webkit-tap-highlight-color: transparent;
-}
-.pf-bnav-item.active { color: var(--gold); }
-.pf-bnav-item svg { width: 19px; height: 19px; }
-.pf-bnav-center {
-  width: 44px; height: 44px; background: var(--ink); border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 16px rgba(28,28,28,0.2); margin-bottom: -4px;
-}
+/* ── BOTTOM NAV removed ── */
 
 /* ── MODAL ── */
 .pf-overlay {
@@ -343,10 +323,24 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .pf-layout { display: block; }
-  .pf-sidebar { transform: translateX(-100%); }
-  .pf-sidebar.open { transform: translateX(0); }
-  .pf-main { margin-left: 0 !important; padding: 20px 16px 96px; width: 100%; }
+  .pf-sidebar {
+    transform: translateX(-100%);
+    /* Fully opaque on mobile so nothing bleeds through */
+    background: var(--cream);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .pf-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(28,28,28,0.18);
+  }
+  .pf-main { margin-left: 0 !important; padding: 20px 16px 48px; width: 100%; }
   .pf-topbar { display: flex; }
-  .pf-bottom-nav { display: block; }
 }
-@media (min-width: 901px) { .pf-topbar { display: none; } }
+@media (min-width: 901px) {
+  .pf-topbar { display: none; }
+}

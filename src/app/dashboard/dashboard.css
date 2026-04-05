@@ -331,7 +331,11 @@
 }
 /* ── SIDEBAR NAV SCROLL on small screens ── */
 @media (max-width: 900px) {
-  .db-sidebar-nav {
+  .db-sidebar {
+    /* Fully opaque on mobile — no bleed-through */
+    background: var(--cream);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     overflow-y: auto;
     flex: 1;
   }

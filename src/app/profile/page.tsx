@@ -9,7 +9,6 @@ export default function ProfilePage() {
   /* ── State ── */
   const [sidebarOpen, setSidebarOpen]     = useState(false);
   const [activeNav, setActiveNav]         = useState('profile');
-  const [activeMobNav, setActiveMobNav]   = useState('profile');
   const [toastMsg, setToastMsg]           = useState('');
   const [toastCls, setToastCls]           = useState('');
   const [toastShow, setToastShow]         = useState(false);
@@ -432,39 +431,6 @@ export default function ProfilePage() {
           </div>
         </div>{/* /main */}
       </div>{/* /layout */}
-
-      {/* BOTTOM NAV */}
-      <nav className="pf-bottom-nav">
-        <div className="pf-bottom-nav-inner">
-          {([
-            { id:'dashboard', label:'Home',   fn:()=>router.push('/dashboard'), svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></> },
-            { id:'seasons',   label:'Seasons',fn:()=>{setActiveMobNav('seasons');showToast('Seasons tab');}, svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/> },
-          ] as {id:string;label:string;fn:()=>void;svg:React.ReactNode}[]).map(item => (
-            <button key={item.id} className={`pf-bnav-item${activeMobNav===item.id?' active':''}`} onClick={item.fn}>
-              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{item.svg}</svg>
-              {item.label}
-            </button>
-          ))}
-
-          {/* Center add button */}
-          <button className="pf-bnav-item" onClick={() => showToast('Opening Deposit…')} style={{ flexDirection:'column', alignItems:'center' }}>
-            <div className="pf-bnav-center">
-              <svg width="20" height="20" fill="none" stroke="var(--cream)" strokeWidth="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </div>
-            <span style={{ marginTop:2 }}>Add</span>
-          </button>
-
-          {([
-            { id:'referral', label:'Refer',   fn:()=>{setActiveMobNav('referral');showToast('Referral tab');}, svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></> },
-            { id:'profile',  label:'Profile', fn:()=>router.push('/profile'), svg:<><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></> },
-          ] as {id:string;label:string;fn:()=>void;svg:React.ReactNode}[]).map(item => (
-            <button key={item.id} className={`pf-bnav-item${activeMobNav===item.id?' active':''}`} onClick={item.fn}>
-              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{item.svg}</svg>
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </nav>
 
       {/* SEE MORE MODAL */}
       <div className={`pf-overlay${seeMoreOpen?' open':''}`} onClick={e => { if (e.target === e.currentTarget) setSeeMoreOpen(false); }}>
