@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 
 declare global {
@@ -9,10 +10,11 @@ declare global {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   /* ── State ── */
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [activeNav, setActiveNav]           = useState('dashboard');
-  const [activeMobNav, setActiveMobNav]     = useState('dashboard');
   const [depositOpen, setDepositOpen]       = useState(false);
   const [withdrawOpen, setWithdrawOpen]     = useState(false);
   const [toastMsg, setToastMsg]             = useState('');
@@ -264,7 +266,7 @@ export default function DashboardPage() {
             ))}
           </nav>
           <div className="db-sidebar-footer">
-            <div className="db-user-row">
+            <div className="db-user-row" onClick={()=>router.push('/profile')} style={{cursor:'pointer'}}>
               <div className="db-avatar">RK</div>
               <div><div className="db-user-name">Rafiqul M.</div><div className="db-user-tag">Season 4 Investor</div></div>
             </div>
@@ -277,7 +279,7 @@ export default function DashboardPage() {
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <div className="db-logo-mark" style={{width:26,height:26}}/><span className="db-logo-text" style={{fontSize:'1.15rem'}}>Vault<span>X</span></span>
           </div>
-          <div className="db-avatar" style={{width:32,height:32,fontSize:'.8rem'}}>RK</div>
+          <div className="db-avatar" style={{width:32,height:32,fontSize:'.8rem',cursor:'pointer'}} onClick={()=>router.push('/profile')}>RK</div>
         </div>
 
         {/* MAIN */}
@@ -453,34 +455,6 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
-
-      {/* BOTTOM NAV */}
-      <nav className="db-bottom-nav">
-        <div className="db-bottom-nav-inner">
-          {([
-            {id:'dashboard',svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,l:'Home',fn:()=>{setActiveMobNav('dashboard');showToast('Dashboard tab');}},
-            {id:'seasons',  svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,l:'Seasons',fn:()=>{setActiveMobNav('seasons');showToast('Seasons tab');}},
-          ] as {id:string;svg:React.ReactNode;l:string;fn:()=>void}[]).map(item=>(
-            <button key={item.id} className={`db-bnav-item${activeMobNav===item.id?' active':''}`} onClick={item.fn}>
-              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{item.svg}</svg>
-              {item.l}
-            </button>
-          ))}
-          <button className="db-bnav-item" onClick={()=>setDepositOpen(true)} style={{flexDirection:'column',alignItems:'center'}}>
-            <div className="db-bnav-center"><svg width="20" height="20" fill="none" stroke="var(--cream)" strokeWidth="2.2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-            <span style={{marginTop:2}}>Add</span>
-          </button>
-          {([
-            {id:'referral',svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></>,l:'Refer',fn:()=>{setActiveMobNav('referral');showToast('Referral tab');}},
-            {id:'profile', svg:<><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></>,l:'Profile',fn:()=>{setActiveMobNav('profile');showToast('Profile tab');}},
-          ] as {id:string;svg:React.ReactNode;l:string;fn:()=>void}[]).map(item=>(
-            <button key={item.id} className={`db-bnav-item${activeMobNav===item.id?' active':''}`} onClick={item.fn}>
-              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{item.svg}</svg>
-              {item.l}
-            </button>
-          ))}
-        </div>
-      </nav>
 
       {/* DEPOSIT MODAL */}
       <div className={`db-modal-overlay${depositOpen?' open':''}`} onClick={e=>{if(e.target===e.currentTarget)setDepositOpen(false);}}>
