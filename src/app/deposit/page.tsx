@@ -353,17 +353,25 @@ export default function DepositPage() {
             </div>
 
             {/* DEPOSIT HISTORY */}
-            <div style={{marginTop:36}} className="dp-reveal" style={{transitionDelay:'.14s'}}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-                <div>
-                  <span className="dp-label">Records</span>
-                  <div className="dp-section-title" style={{fontSize:'1.15rem'}}>Deposit History</div>
-                </div>
-              </div>
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                {history.length===0
-                  ? <div style={{textAlign:'center',padding:32,color:'var(--txt3)',fontSize:'.82rem'}}>No deposit records yet.</div>
-                  : history.map((d,i)=>(
+<div 
+  className="dp-reveal" 
+  style={{ 
+    marginTop: 36, 
+    transitionDelay: '.14s' 
+  }}
+>
+  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+    <div>
+      <span className="dp-label">Records</span>
+      <div className="dp-section-title" style={{fontSize:'1.15rem'}}>Deposit History</div>
+    </div>
+  </div>
+
+  {/* ... rest of your history code stays exactly the same ... */}
+  <div style={{display:'flex',flexDirection:'column',gap:8}}>
+    {history.length===0
+      ? <div style={{textAlign:'center',padding:32,color:'var(--txt3)',fontSize:'.82rem'}}>No deposit records yet.</div>
+      : history.map((d,i)=>(
                     <div key={i} className="dp-hist-row">
                       <div style={{display:'flex',alignItems:'center',gap:12,flex:1,minWidth:0}}>
                         <div style={{width:34,height:34,background:'rgba(184,147,90,0.1)',border:'1px solid var(--border)',borderRadius:'var(--r)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
