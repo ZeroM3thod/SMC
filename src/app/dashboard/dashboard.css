@@ -25,13 +25,17 @@
 /* ── SIDEBAR ── */
 .db-sidebar {
   width: 220px; flex-shrink: 0;
-  background: rgba(246,241,233,0.92);
-  backdrop-filter: blur(16px);
+  /* Always solid — no glass effect that causes blur bleed-through */
+  background: #f6f1e9;
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   padding: 28px 0 24px;
-  position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  /* z-index above overlay (299) so clicks always reach nav buttons */
+  z-index: 300;
   transition: transform .3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .db-sidebar-logo { padding: 0 22px 28px; border-bottom: 1px solid var(--border); }
 .db-logo-mark {
@@ -82,8 +86,10 @@
 
 /* ── SIDEBAR OVERLAY ── */
 .db-sidebar-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(28,28,28,0.5);
-  z-index: 199; backdrop-filter: blur(4px);
+  display: none; position: fixed; inset: 0;
+  background: rgba(28,28,28,0.45);
+  /* No backdrop-filter — sidebar must show clearly */
+  z-index: 299;
 }
 .db-sidebar-overlay.open { display: block; }
 
@@ -294,12 +300,13 @@
   .db-layout { display: block; }
   .db-sidebar {
     transform: translateX(-100%);
-    overflow-y: auto;
-    overflow-x: hidden;
     height: 100vh;
     height: 100dvh;
   }
-  .db-sidebar.open { transform: translateX(0); box-shadow: 4px 0 32px rgba(28,28,28,0.18); }
+  .db-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(28,28,28,0.22);
+  }
   .db-main { margin-left: 0 !important; padding: 20px 16px 48px; width: 100%; }
   .db-topbar { display: flex; }
   .db-grid-4 { grid-template-columns: 1fr 1fr !important; }
@@ -329,20 +336,13 @@
   .db-ref-stats-grid { grid-template-columns: 1fr !important; }
   .db-toast { max-width: calc(100vw - 24px); text-align: center; white-space: normal; }
 }
-/* ── SIDEBAR NAV SCROLL on small screens ── */
-@media (max-width: 900px) {
-  .db-sidebar {
-    /* Fully opaque on mobile — no bleed-through */
-    background: var(--cream);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    overflow-y: auto;
-    flex: 1;
-  }
-  .db-sidebar-nav::-webkit-scrollbar { width: 2px; }
-  .db-sidebar-nav::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-}
 
 @media (min-width: 901px) {
   .db-topbar { display: none; }
+  /* On desktop, sidebar can use glass effect */
+  .db-sidebar {
+    background: rgba(246,241,233,0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }

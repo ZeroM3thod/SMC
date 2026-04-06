@@ -1,35 +1,36 @@
 'use client';
+
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interface Window { Chart: any; }
 }
+
 export default function DashboardPage() {
   const router = useRouter();
+
   /* ── State ── */
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [activeNav, setActiveNav]           = useState('dashboard');
-  const [depositOpen, setDepositOpen]       = useState(false);
-  const [withdrawOpen, setWithdrawOpen]     = useState(false);
   const [toastMsg, setToastMsg]             = useState('');
   const [toastShow, setToastShow]           = useState(false);
   const [displayBalance, setDisplayBalance] = useState('$2,847.65');
   const [progWidth, setProgWidth]           = useState('0%');
-  const [depAmt, setDepAmt]                 = useState('');
-  const [wdAmt, setWdAmt]                   = useState('');
   const [chartMode, setChartMode]           = useState<'roi' | 'usdt'>('roi');
   const [chartReady, setChartReady]         = useState(false);
+
   /* ── Refs ── */
   const bgCanvasRef   = useRef<HTMLCanvasElement>(null);
-  const cfCanvasRef   = useRef<HTMLCanvasElement>(null);
   const toastTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
   const balAnimRef    = useRef<number>(0);
   const chartRef      = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chartInstance = useRef<any>(null);
   const balanceRef    = useRef(2847.65);
+
   /* ── Toast ── */
   const showToast = useCallback((msg: string) => {
     setToastMsg('✓  ' + msg);
@@ -37,6 +38,7 @@ export default function DashboardPage() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToastShow(false), 3200);
   }, []);
+
   /* ── Balance animation ── */
   const animBal = useCallback((target: number, dur = 1100) => {
     const from = balanceRef.current;
@@ -52,38 +54,7 @@ export default function DashboardPage() {
     };
     balAnimRef.current = requestAnimationFrame(tick);
   }, []);
-  /* ── Confetti ── */
-  const launchConfetti = useCallback(() => {
-    const cfc = cfCanvasRef.current;
-    if (!cfc) return;
-    const cfx = cfc.getContext('2d');
-    if (!cfx) return;
-    cfc.width = window.innerWidth; cfc.height = window.innerHeight;
-    const cols = ['#1c1c1c','#f6f1e9','#b8935a','#d4aa72','#4a6741','#6a8c60','#ede7da'];
-    type P = { x:number;y:number;r:number;dx:number;dy:number;rot:number;drot:number;color:string;life:number;max:number };
-    let cfp: P[] = [];
-    for (let i = 0; i < 100; i++) {
-      cfp.push({
-        x:Math.random()*cfc.width, y:-10-Math.random()*150,
-        r:2+Math.random()*5, dx:(Math.random()-.5)*3.5, dy:2+Math.random()*4.5,
-        rot:Math.random()*Math.PI*2, drot:(Math.random()-.5)*.15,
-        color:cols[Math.floor(Math.random()*cols.length)], life:0, max:110+Math.random()*45,
-      });
-    }
-    const cfLoop = () => {
-      cfx.clearRect(0,0,cfc.width,cfc.height);
-      cfp.forEach(p=>{
-        p.x+=p.dx; p.y+=p.dy; p.rot+=p.drot; p.life++;
-        cfx.save(); cfx.translate(p.x,p.y); cfx.rotate(p.rot);
-        cfx.fillStyle=p.color; cfx.globalAlpha=Math.max(0,1-p.life/p.max);
-        cfx.fillRect(-p.r,-p.r,p.r*2,p.r*1.4); cfx.restore();
-      });
-      cfp = cfp.filter(p=>p.life<p.max&&p.y<cfc.height+25);
-      if (cfp.length) requestAnimationFrame(cfLoop);
-      else cfx.clearRect(0,0,cfc.width,cfc.height);
-    };
-    cfLoop();
-  }, []);
+
   /* ── Background canvas ── */
   useEffect(() => {
     const bgC = bgCanvasRef.current;
@@ -126,13 +97,16 @@ export default function DashboardPage() {
     window.addEventListener('resize',resize); resize(); anim();
     return ()=>{ window.removeEventListener('resize',resize); cancelAnimationFrame(animId); };
   }, []);
+
   /* ── Progress bar ── */
   useEffect(() => { const t=setTimeout(()=>setProgWidth('46.7%'),350); return ()=>clearTimeout(t); }, []);
+
   /* ── Balance ticker ── */
   useEffect(() => {
     const iv=setInterval(()=>{ const n=Math.max(2600,balanceRef.current+(Math.random()-.48)*.6); animBal(n,700); },4200);
     return ()=>clearInterval(iv);
   }, [animBal]);
+
   /* ── Chart.js init ── */
   const initChart = useCallback(() => {
     if (!chartRef.current || !window.Chart) return;
@@ -156,7 +130,9 @@ export default function DashboardPage() {
       },
     });
   }, []);
+
   useEffect(() => { if (chartReady) initChart(); }, [chartReady, initChart]);
+
   /* ── Switch chart ── */
   const switchChart = useCallback((mode:'roi'|'usdt') => {
     if (!chartInstance.current || !chartRef.current) return;
@@ -181,28 +157,23 @@ export default function DashboardPage() {
     chartInstance.current.update('active');
     setChartMode(mode);
   }, []);
+
   /* ── ESC / scroll lock / reveal ── */
   useEffect(() => {
-    const h=(e:KeyboardEvent)=>{ if(e.key==='Escape'){setDepositOpen(false);setWithdrawOpen(false);setSidebarOpen(false);} };
+    const h=(e:KeyboardEvent)=>{ if(e.key==='Escape'){setSidebarOpen(false);} };
     document.addEventListener('keydown',h);
     return ()=>document.removeEventListener('keydown',h);
   }, []);
   useEffect(() => {
-    document.body.style.overflow=(depositOpen||withdrawOpen||sidebarOpen)?'hidden':'';
+    document.body.style.overflow=(sidebarOpen)?'hidden':'';
     return ()=>{ document.body.style.overflow=''; };
-  }, [depositOpen,withdrawOpen,sidebarOpen]);
+  }, [sidebarOpen]);
   useEffect(() => {
     const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('show');obs.unobserve(e.target);} }),{threshold:.12});
     document.querySelectorAll<HTMLElement>('.db-reveal').forEach(el=>obs.observe(el));
     return ()=>obs.disconnect();
   }, []);
-  /* ── Transactions ── */
-  const processTx = (type:'deposit'|'withdraw') => {
-    const amt=parseFloat(type==='deposit'?depAmt:wdAmt)||200;
-    if (type==='deposit') { setDepositOpen(false); animBal(balanceRef.current+amt); showToast('Deposit of $'+amt.toLocaleString()+' confirmed'); }
-    else                  { setWithdrawOpen(false); animBal(Math.max(0,balanceRef.current-amt)); showToast('Withdrawal of $'+amt.toLocaleString()+' processed'); }
-    launchConfetti();
-  };
+
   /* ── Copy referral ── */
   const copyRef = () => {
     const code='VAULT-X-RK2025';
@@ -214,44 +185,47 @@ export default function DashboardPage() {
     };
     navigator.clipboard?.writeText(code).then(()=>showToast('Referral code copied')).catch(fb)??fb();
   };
+
   /* ════════════════════════════════════════════════ */
   return (
     <>
       <Script src="https://cdn.jsdelivr.net/npm/chart.js" onReady={()=>setChartReady(true)} />
       <canvas ref={bgCanvasRef} style={{position:'fixed',inset:0,zIndex:0,pointerEvents:'none',opacity:.055,width:'100%',height:'100%'}}/>
-      <canvas ref={cfCanvasRef} style={{position:'fixed',inset:0,zIndex:2000,pointerEvents:'none'}}/>
       <div className={`db-toast${toastShow?' show':''}`}>{toastMsg}</div>
+      {/* SIDEBAR — outside layout so z-index works correctly on mobile */}
+      <aside className={`db-sidebar${sidebarOpen?' open':''}`}>
+        <div className="db-sidebar-logo">
+          <a href="/" style={{textDecoration:'none',display:'flex',alignItems:'center'}}>
+            <div className="db-logo-mark"/><span className="db-logo-text">Vault<span>X</span></span>
+          </a>
+        </div>
+        <nav className="db-sidebar-nav">
+          {([
+            {id:'dashboard',svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,label:'Dashboard',fn:()=>{setActiveNav('dashboard');setSidebarOpen(false);showToast('Dashboard view');}},
+            {id:'seasons',  svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,label:'Seasons',fn:()=>{router.push('/season');}},
+            {id:'deposit',  svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Deposit',fn:()=>router.push('/deposit')},
+            {id:'withdraw', svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Withdraw',fn:()=>router.push('/withdraw')},
+            {id:'referral', svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>,label:'Referral',fn:()=>{setActiveNav('referral');setSidebarOpen(false);showToast('Referral view');}},
+            {id:'support',  svg:<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,label:'Support',fn:()=>{setActiveNav('support');setSidebarOpen(false);showToast('Support view');}},
+          ] as {id:string;svg:React.ReactNode;label:string;fn:()=>void}[]).map(n=>(
+            <button key={n.id} className={`db-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
+              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="db-sidebar-footer">
+          <div className="db-user-row" onClick={()=>router.push('/profile')} style={{cursor:'pointer'}}>
+            <div className="db-avatar">RK</div>
+            <div><div className="db-user-name">Rafiqul M.</div><div className="db-user-tag">Season 4 Investor</div></div>
+          </div>
+        </div>
+      </aside>
+
       <div className={`db-sidebar-overlay${sidebarOpen?' open':''}`} onClick={()=>setSidebarOpen(false)}/>
+
       <div className="db-layout">
-        {/* SIDEBAR */}
-        <aside className={`db-sidebar${sidebarOpen?' open':''}`}>
-          <div className="db-sidebar-logo">
-            <a href="/" style={{textDecoration:'none',display:'flex',alignItems:'center'}}>
-              <div className="db-logo-mark"/><span className="db-logo-text">Vault<span>X</span></span>
-            </a>
-          </div>
-          <nav className="db-sidebar-nav">
-            {([
-              {id:'dashboard',svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,label:'Dashboard',fn:()=>{setActiveNav('dashboard');setSidebarOpen(false);showToast('Dashboard view');}},
-              {id:'seasons',  svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,label:'Seasons',fn:()=>{setSidebarOpen(false); router.push('/season');}},
-              {id:'deposit',  svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Deposit',fn:()=>{setDepositOpen(true);setSidebarOpen(false);}},
-              {id:'withdraw', svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></>,label:'Withdraw',fn:()=>{setWithdrawOpen(true);setSidebarOpen(false);}},
-              {id:'referral', svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>,label:'Referral',fn:()=>{setActiveNav('referral');setSidebarOpen(false);showToast('Referral view');}},
-              {id:'support',  svg:<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,label:'Support',fn:()=>{setActiveNav('support');setSidebarOpen(false);showToast('Support view');}},
-            ] as {id:string;svg:React.ReactNode;label:string;fn:()=>void}[]).map(n=>(
-              <button key={n.id} className={`db-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
-                <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
-                {n.label}
-              </button>
-            ))}
-          </nav>
-          <div className="db-sidebar-footer">
-            <div className="db-user-row" onClick={()=>router.push('/profile')} style={{cursor:'pointer'}}>
-              <div className="db-avatar">RK</div>
-              <div><div className="db-user-name">Rafiqul M.</div><div className="db-user-tag">Season 4 Investor</div></div>
-            </div>
-          </div>
-        </aside>
+
         {/* MOBILE TOPBAR */}
         <div className="db-topbar">
           <button className="db-hamburger" onClick={()=>setSidebarOpen(true)}><span/><span/><span/></button>
@@ -260,9 +234,11 @@ export default function DashboardPage() {
           </div>
           <div className="db-avatar" style={{width:32,height:32,fontSize:'.8rem',cursor:'pointer'}} onClick={()=>router.push('/profile')}>RK</div>
         </div>
+
         {/* MAIN */}
         <main className="db-main">
           <div style={{maxWidth:900,margin:'0 auto'}}>
+
             {/* HEADER */}
             <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:16,marginBottom:28}} className="db-reveal">
               <div>
@@ -275,6 +251,7 @@ export default function DashboardPage() {
                 <div className="db-live-pill"><div className="db-live-dot"/>Season 4 Live</div>
               </div>
             </div>
+
             {/* BALANCE HERO */}
             <div className="db-balance-hero db-reveal" style={{marginBottom:20,transitionDelay:'.06s'}}>
               <div style={{display:'flex',flexWrap:'wrap',alignItems:'flex-start',justifyContent:'space-between',gap:16,position:'relative',zIndex:1}}>
@@ -301,6 +278,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
             {/* STAT CARDS */}
             <div className="db-grid-4 db-reveal" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20,transitionDelay:'.1s'}}>
               {([
@@ -321,13 +299,16 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+
             {/* ACTION BUTTONS */}
             <div className="db-grid-2 db-reveal" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:20,transitionDelay:'.13s'}}>
-              <button className="db-btn db-btn-dark" onClick={()=>setDepositOpen(true)}><span>+ Deposit</span></button>
-              <button className="db-btn db-btn-outline" onClick={()=>setWithdrawOpen(true)}>Withdraw →</button>
+              <button className="db-btn db-btn-dark" onClick={()=>router.push('/deposit')}><span>+ Deposit</span></button>
+              <button className="db-btn db-btn-outline" onClick={()=>router.push('/withdraw')}>Withdraw →</button>
             </div>
+
             {/* CHART + SEASONS */}
             <div className="db-mid-grid db-reveal" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:20}}>
+
               {/* CHART */}
               <div className="db-card" style={{padding:'22px 20px'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
@@ -348,6 +329,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
+
               {/* SEASONS */}
               <div className="db-card" style={{padding:'22px 20px'}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
@@ -387,6 +369,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
             {/* REFERRAL CARD */}
             <div className="db-card db-reveal" style={{padding:'24px 22px',marginBottom:20,transitionDelay:'.18s'}}>
               <div className="db-ref-head-grid" style={{display:'grid',gridTemplateColumns:'1fr auto',alignItems:'start',gap:16,marginBottom:20}}>
@@ -412,76 +395,20 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
+
             {/* NOTICE STRIP */}
             <div className="db-reveal" style={{background:'var(--ink)',borderRadius:'var(--r-lg)',padding:'18px 22px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap',transitionDelay:'.22s'}}>
               <div>
                 <div style={{fontSize:'.68rem',letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(246,241,233,0.35)',marginBottom:5}}>Season 4 · Entry Closing</div>
                 <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'1.15rem',fontWeight:400,color:'var(--cream)'}}>18 days remain to join Season 4. Pool at 62% capacity.</div>
               </div>
-              <button className="db-btn db-btn-dark" style={{whiteSpace:'nowrap',flexShrink:0}} onClick={()=>setDepositOpen(true)}><span>Invest Now</span></button>
+              <button className="db-btn db-btn-dark" style={{whiteSpace:'nowrap',flexShrink:0}} onClick={()=>router.push('/deposit')}><span>Invest Now</span></button>
             </div>
+
           </div>
         </main>
       </div>
-      {/* DEPOSIT MODAL */}
-      <div className={`db-modal-overlay${depositOpen?' open':''}`} onClick={e=>{if(e.target===e.currentTarget)setDepositOpen(false);}}>
-        <div className="db-modal-sheet">
-          <div className="db-modal-handle"/>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-            <div><span className="db-label">Add Funds</span><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'1.5rem',fontWeight:400,color:'var(--ink)'}}>Deposit USDT</div></div>
-            <button onClick={()=>setDepositOpen(false)} style={{width:30,height:30,background:'var(--parchment)',border:'1px solid var(--border)',borderRadius:'var(--r)',cursor:'pointer',color:'var(--txt2)',fontSize:'1rem',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>✕</button>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:7,marginBottom:16}}>
-            {[100,500,1000,5000].map(v=>(
-              <button key={v} onClick={()=>setDepAmt(String(v))} style={{padding:'9px 0',background:'var(--parchment)',border:'1px solid var(--border)',borderRadius:'var(--r)',fontSize:'.78rem',color:'var(--gold)',cursor:'pointer',fontFamily:"'DM Sans',sans-serif",transition:'all .2s'}}>
-                {v>=1000?`$${v/1000}K`:`$${v}`}
-              </button>
-            ))}
-          </div>
-          <div style={{marginBottom:13}}>
-            <label style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt2)',display:'block',marginBottom:6}}>Amount (USDT)</label>
-            <input type="number" className="db-modal-input" placeholder="Minimum $100" value={depAmt} onChange={e=>setDepAmt(e.target.value)}/>
-          </div>
-          <div style={{marginBottom:13}}>
-            <label style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt2)',display:'block',marginBottom:6}}>Network</label>
-            <select className="db-modal-input db-modal-select"><option>TRC-20 (TRON)</option><option>ERC-20 (Ethereum)</option><option>BEP-20 (BSC)</option></select>
-          </div>
-          <div style={{background:'rgba(74,103,65,0.06)',border:'1px solid rgba(74,103,65,0.18)',borderRadius:'var(--r)',padding:'12px 14px',marginBottom:20}}>
-            <div style={{fontSize:'.75rem',color:'var(--sage)',lineHeight:1.6}}>Funds are locked for Season 4 (90 days). Projected return: 24–32% ROI</div>
-          </div>
-          <button className="db-btn db-btn-dark" style={{width:'100%',padding:14}} onClick={()=>processTx('deposit')}><span>Confirm Deposit</span></button>
-        </div>
-      </div>
-      {/* WITHDRAW MODAL */}
-      <div className={`db-modal-overlay${withdrawOpen?' open':''}`} onClick={e=>{if(e.target===e.currentTarget)setWithdrawOpen(false);}}>
-        <div className="db-modal-sheet">
-          <div className="db-modal-handle"/>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-            <div><span className="db-label">Cash Out</span><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'1.5rem',fontWeight:400,color:'var(--ink)'}}>Withdraw USDT</div></div>
-            <button onClick={()=>setWithdrawOpen(false)} style={{width:30,height:30,background:'var(--parchment)',border:'1px solid var(--border)',borderRadius:'var(--r)',cursor:'pointer',color:'var(--txt2)',fontSize:'1rem',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>✕</button>
-          </div>
-          <div style={{background:'var(--parchment)',border:'1px solid var(--border)',borderRadius:'var(--r)',padding:'14px 16px',marginBottom:16}}>
-            <div style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt3)',marginBottom:4}}>Available</div>
-            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:'2rem',fontWeight:400,color:'var(--sage)'}}>$1,920.00</div>
-          </div>
-          <div style={{marginBottom:13}}>
-            <label style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt2)',display:'block',marginBottom:6}}>Amount</label>
-            <input type="number" className="db-modal-input" placeholder="Max $1,920.00" value={wdAmt} onChange={e=>setWdAmt(e.target.value)}/>
-          </div>
-          <div style={{marginBottom:13}}>
-            <label style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt2)',display:'block',marginBottom:6}}>Wallet Address</label>
-            <input type="text" className="db-modal-input" placeholder="TRX / ETH address"/>
-          </div>
-          <div style={{marginBottom:13}}>
-            <label style={{fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'var(--txt2)',display:'block',marginBottom:6}}>Network</label>
-            <select className="db-modal-input db-modal-select"><option>TRC-20 (TRON)</option><option>ERC-20 (Ethereum)</option></select>
-          </div>
-          <div style={{background:'rgba(184,147,90,0.06)',border:'1px solid rgba(184,147,90,0.18)',borderRadius:'var(--r)',padding:'12px 14px',marginBottom:20}}>
-            <div style={{fontSize:'.75rem',color:'var(--gold)',lineHeight:1.6}}>Your referrer automatically receives 5% commission on this withdrawal.</div>
-          </div>
-          <button className="db-btn db-btn-dark" style={{width:'100%',padding:14}} onClick={()=>processTx('withdraw')}><span>Confirm Withdrawal</span></button>
-        </div>
-      </div>
+
     </>
   );
 }

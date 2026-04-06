@@ -165,45 +165,44 @@ export default function ProfilePage() {
       {/* Toast */}
       <div className={`pf-toast${toastShow?' show':''}${toastCls?' '+toastCls:''}`}>{toastMsg}</div>
 
+      {/* SIDEBAR — outside layout for correct z-index stacking */}
+      <aside className={`pf-sidebar${sidebarOpen?' open':''}`}>
+        <div className="pf-sidebar-logo">
+          <a href="/" style={{ textDecoration:'none', display:'flex', alignItems:'center' }}>
+            <div className="pf-logo-mark" />
+            <span className="pf-logo-text">Vault<span>X</span></span>
+          </a>
+        </div>
+        <nav className="pf-sidebar-nav">
+          {([
+            { id:'dashboard', label:'Dashboard', fn:()=>{router.push('/dashboard');}, svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></> },
+            { id:'seasons',   label:'Seasons',   fn:()=>{router.push('/season');}, svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/> },
+            { id:'deposit',   label:'Deposit',   fn:()=>{router.push('/deposit');}, svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> },
+            { id:'withdraw',  label:'Withdraw',  fn:()=>{router.push('/withdraw');}, svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></> },
+            { id:'referral',  label:'Referral',  fn:()=>{router.push('referral');}, svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></> },
+            { id:'support',   label:'Support',   fn:()=>{router.push('support');}, svg:<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></> },
+          ] as { id:string; label:string; fn:()=>void; svg:React.ReactNode }[]).map(n => (
+            <button key={n.id} className={`pf-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
+              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="pf-sidebar-footer">
+          <div className="pf-user-row" onClick={() => router.push('/profile')} style={{ cursor:'pointer' }}>
+            <div className="pf-avatar">RK</div>
+            <div>
+              <div className="pf-user-name">{heroName.split(' ')[0]} M.</div>
+              <div className="pf-user-tag">Season 4 Investor</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
       {/* Sidebar overlay */}
       <div className={`pf-sidebar-overlay${sidebarOpen?' open':''}`} onClick={() => setSidebarOpen(false)} />
 
       <div className="pf-layout">
-
-        {/* ═══ SIDEBAR ═══ */}
-        <aside className={`pf-sidebar${sidebarOpen?' open':''}`}>
-          <div className="pf-sidebar-logo">
-            <a href="/" style={{ textDecoration:'none', display:'flex', alignItems:'center' }}>
-              <div className="pf-logo-mark" />
-              <span className="pf-logo-text">Vault<span>X</span></span>
-            </a>
-          </div>
-          <nav className="pf-sidebar-nav">
-            {([
-              { id:'dashboard', label:'Dashboard', fn:()=>{router.push('/dashboard');}, svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></> },
-              { id:'seasons',   label:'Seasons',   fn:()=>{setActiveNav('seasons');setSidebarOpen(false);showToast('Seasons view');}, svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/> },
-              { id:'deposit',   label:'Deposit',   fn:()=>{setSidebarOpen(false);showToast('Opening Deposit…');}, svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> },
-              { id:'withdraw',  label:'Withdraw',  fn:()=>{setSidebarOpen(false);showToast('Opening Withdraw…');}, svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></> },
-              { id:'referral',  label:'Referral',  fn:()=>{setActiveNav('referral');setSidebarOpen(false);showToast('Referral view');}, svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></> },
-              { id:'support',   label:'Support',   fn:()=>{setActiveNav('support');setSidebarOpen(false);showToast('Support view');}, svg:<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></> },
-            ] as { id:string; label:string; fn:()=>void; svg:React.ReactNode }[]).map(n => (
-              <button key={n.id} className={`pf-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
-                <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
-                {n.label}
-              </button>
-            ))}
-          </nav>
-          {/* Sidebar footer — clickable → /profile */}
-          <div className="pf-sidebar-footer">
-            <div className="pf-user-row" onClick={() => router.push('/profile')} style={{ cursor:'pointer' }}>
-              <div className="pf-avatar">RK</div>
-              <div>
-                <div className="pf-user-name">{heroName.split(' ')[0]} M.</div>
-                <div className="pf-user-tag">Season 4 Investor</div>
-              </div>
-            </div>
-          </div>
-        </aside>
 
         {/* ═══ MOBILE TOPBAR ═══ */}
         <div className="pf-topbar">

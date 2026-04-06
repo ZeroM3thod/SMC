@@ -228,13 +228,13 @@ export default function SeasonPage() {
       svg:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></> },
     { id:'seasons',   label:'Seasons',   fn:()=>{ setActiveNav('seasons'); setSidebarOpen(false); },
       svg:<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/> },
-    { id:'deposit',   label:'Deposit',   fn:()=>{ setSidebarOpen(false); showToast('Opening Deposit…'); },
+    { id:'deposit',   label:'Deposit',  fn:()=>router.push('/deposit'),
       svg:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> },
-    { id:'withdraw',  label:'Withdraw',  fn:()=>{ setSidebarOpen(false); showToast('Opening Withdraw…'); },
+    { id:'withdraw',  label:'Withdraw',  fn:()=>router.push('/withdraw'),
       svg:<><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></> },
-    { id:'referral',  label:'Referral',  fn:()=>{ setActiveNav('referral'); setSidebarOpen(false); showToast('Referral view'); },
+    { id:'referral',  label:'Referral',  fn:()=>router.push('/raferral'),
       svg:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></> },
-    { id:'support',   label:'Support',   fn:()=>{ setActiveNav('support'); setSidebarOpen(false); showToast('Support view'); },
+    { id:'support',   label:'Support',   fn:()=>router.push('/support'),
       svg:<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></> },
   ] as { id:string; label:string; fn:()=>void; svg:React.ReactNode }[];
 
@@ -247,36 +247,36 @@ export default function SeasonPage() {
       {/* Toast */}
       <div className={`sx-toast${toastShow?' show':''}${toastCls?' '+toastCls:''}`}>{toastMsg}</div>
 
+      {/* SIDEBAR — outside layout so z-index stacking works on mobile */}
+      <aside className={`sx-sidebar${sidebarOpen?' open':''}`}>
+        <div className="sx-sidebar-logo">
+          <a href="/" style={{textDecoration:'none',display:'flex',alignItems:'center'}}>
+            <div className="sx-logo-mark"/><span className="sx-logo-text">Vault<span>X</span></span>
+          </a>
+        </div>
+        <nav className="sx-sidebar-nav">
+          {navItems.map(n => (
+            <button key={n.id} className={`sx-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
+              <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="sx-sidebar-footer">
+          <div className="sx-user-row" onClick={()=>router.push('/profile')}>
+            <div className="sx-avatar">RK</div>
+            <div>
+              <div className="sx-user-name">Rakib Kowshar</div>
+              <div className="sx-user-tag">Season 4 Investor</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
       {/* Sidebar overlay */}
       <div className={`sx-sidebar-overlay${sidebarOpen?' open':''}`} onClick={()=>setSidebarOpen(false)}/>
 
       <div className="sx-layout">
-
-        {/* ═══ SIDEBAR ═══ */}
-        <aside className={`sx-sidebar${sidebarOpen?' open':''}`}>
-          <div className="sx-sidebar-logo">
-            <a href="/" style={{textDecoration:'none',display:'flex',alignItems:'center'}}>
-              <div className="sx-logo-mark"/><span className="sx-logo-text">Vault<span>X</span></span>
-            </a>
-          </div>
-          <nav className="sx-sidebar-nav">
-            {navItems.map(n => (
-              <button key={n.id} className={`sx-nav-item${activeNav===n.id?' active':''}`} onClick={n.fn}>
-                <svg fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">{n.svg}</svg>
-                {n.label}
-              </button>
-            ))}
-          </nav>
-          <div className="sx-sidebar-footer">
-            <div className="sx-user-row" onClick={()=>router.push('/profile')}>
-              <div className="sx-avatar">RK</div>
-              <div>
-                <div className="sx-user-name">Rakib Kowshar</div>
-                <div className="sx-user-tag">Season 4 Investor</div>
-              </div>
-            </div>
-          </div>
-        </aside>
 
         {/* ═══ MOBILE TOPBAR ═══ */}
         <div className="sx-topbar">
